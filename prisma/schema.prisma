@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum DiscoverySource {
+  TWITTER
+  GOOGLE_IMPORT
+  MANUAL
+}
+
+enum ContentLevel {
+  FULL_TEXT
+  SNIPPET_ONLY
+  MANUAL_TEXT
+}
+
+enum ClassificationType {
+  QUALIFIED_LEAD
+  NOT_A_LEAD
+  NEEDS_REVIEW
+}
+
+enum HiringIntent {
+  EXPLICIT
+  IMPLIED
+  UNCLEAR
+  NONE
+}
+
+enum PriorityLevel {
+  HIGH
+  MEDIUM
+  LOW
+  VERY_LOW
+}
+
+enum LeadStatus {
+  NEW
+  REVIEWED
+  INTERESTED
+  CONTACTED
+  CLOSED
+  REJECTED
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Post {
+  id             String           @id @default(uuid())
+  source         DiscoverySource
+  externalPostId String?
+  contentHash    String           @unique
+  originalUrl    String
+  title          String?
+  content        String           @db.Text
+  snippet        String?          @db.Text
+  authorName     String?
+  authorId       String?
+  publishedAt    DateTime?
+  discoveredAt   DateTime         @default(now())
+  contentLevel   ContentLevel     @default(FULL_TEXT)
+  rawMetadata    Json?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  lead           Lead?
+  aiLogs         AIProcessingLog[]
+
+  @@unique([source, externalPostId])
+  @@index([source])
+  @@index([discoveredAt])
+  @@index([publishedAt])
+  @@map("posts")
+}
+
+model Lead {
+  id                 String             @id @default(uuid())
+  postId             String             @unique
+  post               Post               @relation(fields: [postId], references: [id], onDelete: Cascade)
+  classification     ClassificationType
+  isHiring           Boolean            @default(false)
+  hiringIntent       HiringIntent       @default(NONE)
+  projectTitle       String?
+  projectDescription String?            @db.Text
+  technologies       String[]           @default([])
+  budget             String?
+  deadline           String?
+  startDate          String?
+  contactMethod      String?
+  confidence         Float              @default(0.0)
+  missingInformation String[]           @default([])
+  reason             String             @db.Text
+  leadScore          Int                @default(0)
+  scoreBreakdown     Json?
+  priority           PriorityLevel      @default(VERY_LOW)
+  status             LeadStatus         @default(NEW)
+  notes              String?            @db.Text
+  manualCorrection   Json?
+  reviewedAt         DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([classification])
+  @@index([priority])
+  @@index([status])
+  @@index([leadScore])
+  @@index([createdAt])
+  @@map("leads")
+}
+
+model SearchQuery {
+  id             String            @id @default(uuid())
+  name           String
+  query          String
+  source         DiscoverySource   @default(TWITTER)
+  category       String
+  isActive       Boolean           @default(true)
+  frequency      String            @default("DAILY")
+  maxResults     Int               @default(20)
+  lastExecutedAt DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  executions     SearchExecution[]
+
+  @@index([isActive])
+  @@index([category])
+  @@map("search_queries")
+}
+
+model SearchExecution {
+  id             String          @id @default(uuid())
+  searchQueryId  String
+  searchQuery    SearchQuery     @relation(fields: [searchQueryId], references: [id], onDelete: Cascade)
+  status         ExecutionStatus @default(PENDING)
+  startedAt      DateTime        @default(now())
+  completedAt    DateTime?
+  resultsFound   Int             @default(0)
+  newPosts       Int             @default(0)
+  duplicates     Int             @default(0)
+  qualifiedLeads Int             @default(0)
+  failedJobs     Int             @default(0)
+  errorMessage   String?         @db.Text
+  createdAt      DateTime        @default(now())
+
+  @@index([searchQueryId, createdAt])
+  @@index([status])
+  @@map("search_executions")
+}
+
+model AIProcessingLog {
+  id               String   @id @default(uuid())
+  postId           String
+  post             Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  provider         String   @default("GOOGLE_GEMINI")
+  model            String
+  inputTokens      Int?
+  outputTokens     Int?
+  processingStatus String   // SUCCESS, FAILED, RETRIED
+  processingTimeMs Int
+  rawResponse      Json?
+  errorMessage     String?  @db.Text
+  createdAt        DateTime @default(now())
+
+  @@index([postId])
+  @@index([processingStatus])
+  @@index([createdAt])
+  @@map("ai_processing_logs")
+}

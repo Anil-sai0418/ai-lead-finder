@@ -1,0 +1,31 @@
+{
+  "name": "ai-lead-finder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-Powered Lead Discovery and Classification Platform",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev:backend": "npm run dev --workspace=@ai-lead-finder/backend",
+    "dev:frontend": "npm run dev --workspace=@ai-lead-finder/frontend",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "prisma:generate": "npm run prisma:generate --workspace=@ai-lead-finder/backend",
+    "prisma:migrate": "npm run prisma:migrate --workspace=@ai-lead-finder/backend",
+    "prisma:seed": "npm run prisma:seed --workspace=@ai-lead-finder/backend"
+  },
+  "keywords": [
+    "lead-finder",
+    "ai",
+    "gemini",
+    "bullmq",
+    "prisma",
+    "nextjs",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT"
+}
