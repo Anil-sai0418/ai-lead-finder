@@ -110,16 +110,20 @@ export class DiscoveryManagerService {
         'Search execution completed successfully'
       );
     } catch (error) {
-      await searchRepository.updateExecution(execution.id, {
-        status: 'FAILED',
-        completedAt: new Date(),
-        resultsFound,
-        newPosts,
-        duplicates,
-        qualifiedLeads,
-        failedJobs,
-        errorMessage: (error as Error).message,
-      });
+      try {
+        await searchRepository.updateExecution(execution.id, {
+          status: 'FAILED',
+          completedAt: new Date(),
+          resultsFound,
+          newPosts,
+          duplicates,
+          qualifiedLeads,
+          failedJobs,
+          errorMessage: (error as Error).message,
+        });
+      } catch (updateErr) {
+        logger.warn({ updateErr }, 'Could not record failed execution status');
+      }
       throw error;
     }
   }

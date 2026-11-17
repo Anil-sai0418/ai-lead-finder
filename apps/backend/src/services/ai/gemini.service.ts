@@ -18,17 +18,15 @@ export class GeminiService implements IAIService {
   private modelName: string;
 
   constructor(apiKey?: string, modelName?: string) {
-    const key = apiKey || env.GEMINI_API_KEY;
+    const rawKey = apiKey || env.GEMINI_API_KEY || '';
+    const cleanKey = rawKey.replace(/^["']|["']$/g, '').trim();
     this.modelName = modelName || env.GEMINI_MODEL || 'gemini-1.5-flash';
 
-    const isPlaceholder =
-      !key ||
-      key === 'your-gemini-api-key-here' ||
-      key.startsWith('your-') ||
-      key.trim() === '';
+    // Google Gemini API keys start with AIzaSy...
+    const isValidApiKey = cleanKey.startsWith('AIza');
 
-    if (!isPlaceholder) {
-      this.client = new GoogleGenerativeAI(key);
+    if (isValidApiKey) {
+      this.client = new GoogleGenerativeAI(cleanKey);
     } else {
       logger.warn(
         'GEMINI_API_KEY is not set or is a placeholder. GeminiService will run in deterministic heuristic simulation mode.'
