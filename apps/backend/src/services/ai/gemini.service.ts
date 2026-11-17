@@ -106,13 +106,21 @@ export class GeminiService implements IAIService {
       };
     } catch (error) {
       const processingTimeMs = Date.now() - startTime;
-      logger.error({ error, postId, processingTimeMs }, 'Gemini classification failed');
-      if (error instanceof AppError) throw error;
-      throw new AppError(
-        `Gemini API execution failed: ${(error as Error).message}`,
-        502,
-        'GEMINI_API_ERROR'
+      logger.warn(
+        { error: (error as Error).message, postId, processingTimeMs },
+        'Live Gemini API failed; gracefully falling back to deterministic heuristic classification'
       );
+
+      const fallback = this.heuristicClassification(postId, content, contentLevel, title);
+      return {
+        result: fallback,
+        model: `${this.modelName}-heuristic-fallback`,
+        processingTimeMs,
+        rawResponse: {
+          error: (error as Error).message,
+          simulatedResult: fallback as unknown as Record<string, unknown>,
+        },
+      };
     }
   }
 

@@ -36,47 +36,57 @@ export class LeadPipelineService {
       externalPostId,
     });
 
-    if (dedup.isDuplicate && dedup.existingPost) {
-      logger.info(
-        { postId: dedup.existingPost.id, contentHash: dedup.contentHash },
-        'Post identified as duplicate; skipping AI classification'
-      );
-      const existingLead = await leadRepository.findByPostId(dedup.existingPost.id);
-      return {
-        post: dedup.existingPost,
-        lead: existingLead || undefined,
-        isDuplicate: true,
-      };
-    }
+    let targetPost: Post;
 
-    // 2. Persist Post to DB
-    const createdPost = await postRepository.create({
-      source,
-      externalPostId: externalPostId || null,
-      contentHash: dedup.contentHash,
-      originalUrl: dedup.sanitizedUrl,
-      title: title || null,
-      content,
-      snippet: snippet || null,
-      authorName: authorName || null,
-      authorId: authorId || null,
-      contentLevel,
-      rawMetadata: (rawMetadata as any) || undefined,
-    });
+    if (dedup.isDuplicate && dedup.existingPost) {
+      const existingLead = await leadRepository.findByPostId(dedup.existingPost.id);
+      if (existingLead) {
+        logger.info(
+          { postId: dedup.existingPost.id, contentHash: dedup.contentHash },
+          'Post identified as duplicate with existing lead; returning record'
+        );
+        return {
+          post: dedup.existingPost,
+          lead: existingLead,
+          isDuplicate: true,
+        };
+      }
+      // Post exists in DB but lead creation was interrupted; recover and generate lead
+      logger.info(
+        { postId: dedup.existingPost.id },
+        'Post exists without lead; recovering and completing lead classification'
+      );
+      targetPost = dedup.existingPost;
+    } else {
+      // 2. Persist Post to DB
+      targetPost = await postRepository.create({
+        source,
+        externalPostId: externalPostId || null,
+        contentHash: dedup.contentHash,
+        originalUrl: dedup.sanitizedUrl,
+        title: title || null,
+        content,
+        snippet: snippet || null,
+        authorName: authorName || null,
+        authorId: authorId || null,
+        contentLevel,
+        rawMetadata: (rawMetadata as any) || undefined,
+      });
+    }
 
     // 3. AI Classification
     let aiResponse;
     try {
       aiResponse = await geminiService.classifyPost(
-        createdPost.id,
+        targetPost.id,
         content,
         contentLevel,
         title
       );
     } catch (aiErr) {
-      logger.error({ err: aiErr, postId: createdPost.id }, 'AI classification failed during pipeline execution');
+      logger.error({ err: aiErr, postId: targetPost.id }, 'AI classification failed during pipeline execution');
       await aiLogRepository.create({
-        postId: createdPost.id,
+        postId: targetPost.id,
         model: 'gemini',
         processingStatus: 'FAILED',
         processingTimeMs: 0,
@@ -91,7 +101,7 @@ export class LeadPipelineService {
 
     // 4. Log AI Processing Record
     await aiLogRepository.create({
-      postId: createdPost.id,
+      postId: targetPost.id,
       model: aiResponse.model,
       inputTokens: aiResponse.inputTokens,
       outputTokens: aiResponse.outputTokens,
@@ -105,7 +115,7 @@ export class LeadPipelineService {
 
     // 6. Upsert Lead
     const createdLead = await leadRepository.upsert({
-      postId: createdPost.id,
+      postId: targetPost.id,
       classification: aiResponse.result.classification,
       isHiring: aiResponse.result.is_hiring,
       hiringIntent: aiResponse.result.hiring_intent,
@@ -126,9 +136,9 @@ export class LeadPipelineService {
     });
 
     return {
-      post: createdPost,
+      post: targetPost,
       lead: createdLead,
-      isDuplicate: false,
+      isDuplicate: dedup.isDuplicate,
       scoreResult,
       classification: aiResponse.result,
     };
