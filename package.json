@@ -15,6 +15,7 @@
     "test": "npm run test --workspaces --if-present",
     "prisma:generate": "npm run prisma:generate --workspace=@ai-lead-finder/backend",
     "prisma:migrate": "npm run prisma:migrate --workspace=@ai-lead-finder/backend",
+    "prisma:push": "npm run prisma:push --workspace=@ai-lead-finder/backend",
     "prisma:seed": "npm run prisma:seed --workspace=@ai-lead-finder/backend"
   },
   "keywords": [
