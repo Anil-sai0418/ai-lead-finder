@@ -5,6 +5,10 @@ import { env } from './config/env.js';
 import { healthRouter } from './routes/health.router.js';
 import { postRouter } from './routes/post.router.js';
 import { leadRouter } from './routes/lead.router.js';
+import { searchRouter } from './routes/search.router.js';
+import { dashboardRouter } from './routes/dashboard.router.js';
+import { aiRouter } from './routes/ai.router.js';
+import { getExecutions, getExecutionById } from './controllers/search.controller.js';
 import { errorMiddleware } from './middleware/error.middleware.js';
 
 export function createApp(): Express {
@@ -44,6 +48,11 @@ export function createApp(): Express {
   // Core API routes
   app.use('/api/v1/posts', postRouter);
   app.use('/api/v1/leads', leadRouter);
+  app.use('/api/v1/searches', searchRouter);
+  app.use('/api/v1/dashboard', dashboardRouter);
+  app.use('/api/v1/ai', aiRouter);
+  app.get('/api/v1/executions', getExecutions);
+  app.get('/api/v1/executions/:id', getExecutionById);
 
   // 404 handler
   app.use((_req: Request, res: Response) => {
