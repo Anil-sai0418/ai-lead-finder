@@ -78,7 +78,7 @@ export async function getLeads(req: Request, res: Response, next: NextFunction):
 
 export async function getLeadById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const lead = await leadRepository.findById(id);
 
     if (!lead) {

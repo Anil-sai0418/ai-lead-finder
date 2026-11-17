@@ -53,7 +53,7 @@ export async function getSearchQueries(req: Request, res: Response, next: NextFu
 
 export async function getSearchQueryById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const query = await searchRepository.findQueryById(id);
 
     if (!query) {
@@ -97,7 +97,7 @@ export async function updateSearchQuery(
 
 export async function deleteSearchQuery(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
 
     const existing = await searchRepository.findQueryById(id);
     if (!existing) {
@@ -117,7 +117,7 @@ export async function deleteSearchQuery(req: Request, res: Response, next: NextF
 
 export async function runSearchQueryNow(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const execution = await discoveryManagerService.triggerSearchExecution(id);
 
     res.status(202).json({
@@ -166,7 +166,7 @@ export async function getExecutions(req: Request, res: Response, next: NextFunct
 
 export async function getExecutionById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const execution = await searchRepository.findExecutionById(id);
 
     if (!execution) {
