@@ -21,11 +21,17 @@ export class GeminiService implements IAIService {
     const key = apiKey || env.GEMINI_API_KEY;
     this.modelName = modelName || env.GEMINI_MODEL || 'gemini-1.5-flash';
 
-    if (key) {
+    const isPlaceholder =
+      !key ||
+      key === 'your-gemini-api-key-here' ||
+      key.startsWith('your-') ||
+      key.trim() === '';
+
+    if (!isPlaceholder) {
       this.client = new GoogleGenerativeAI(key);
     } else {
       logger.warn(
-        'GEMINI_API_KEY is not set. GeminiService will run in deterministic heuristic simulation mode.'
+        'GEMINI_API_KEY is not set or is a placeholder. GeminiService will run in deterministic heuristic simulation mode.'
       );
     }
   }

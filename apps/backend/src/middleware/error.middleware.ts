@@ -26,14 +26,16 @@ export function errorMiddleware(
 ): void {
   logger.error({ err }, 'Error caught by errorMiddleware');
 
-  if (err instanceof ZodError) {
+  const isZod = err instanceof ZodError || err.name === 'ZodError' || 'issues' in (err as any);
+  if (isZod) {
+    const issues = (err as any).issues || (err as any).errors || [];
     res.status(400).json({
       success: false,
       error: {
         code: 'VALIDATION_ERROR',
         message: 'Invalid request data',
-        details: err.errors.map((e) => ({
-          field: e.path.join('.'),
+        details: issues.map((e: any) => ({
+          field: Array.isArray(e.path) ? e.path.join('.') : String(e.path || ''),
           message: e.message,
         })),
       },

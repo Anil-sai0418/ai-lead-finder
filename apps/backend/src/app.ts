@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './config/env.js';
 import { healthRouter } from './routes/health.router.js';
+import { postRouter } from './routes/post.router.js';
+import { leadRouter } from './routes/lead.router.js';
 import { errorMiddleware } from './middleware/error.middleware.js';
 
 export function createApp(): Express {
@@ -38,6 +40,10 @@ export function createApp(): Express {
   // Health check routes
   app.use('/health', healthRouter);
   app.use('/api/v1/health', healthRouter);
+
+  // Core API routes
+  app.use('/api/v1/posts', postRouter);
+  app.use('/api/v1/leads', leadRouter);
 
   // 404 handler
   app.use((_req: Request, res: Response) => {
