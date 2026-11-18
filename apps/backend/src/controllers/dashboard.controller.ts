@@ -67,9 +67,16 @@ export async function getRecentLeads(_req: Request, res: Response, next: NextFun
       include: { post: true },
     });
 
+    const serializedLeads = leads.map((lead: any) => ({
+      ...lead,
+      originalUrl: lead.post?.originalUrl || null,
+      source: lead.post?.source || null,
+      authorName: lead.post?.authorName || null,
+    }));
+
     res.status(200).json({
       success: true,
-      data: leads,
+      data: serializedLeads,
     });
   } catch (error) {
     next(error);

@@ -96,6 +96,8 @@ model Post {
   @@index([source])
   @@index([discoveredAt])
   @@index([publishedAt])
+  @@index([originalUrl])
+  @@index([source, discoveredAt(sort: Desc)])
   @@map("posts")
 }
 
@@ -131,6 +133,10 @@ model Lead {
   @@index([status])
   @@index([leadScore])
   @@index([createdAt])
+  @@index([priority, leadScore(sort: Desc)])
+  @@index([classification, priority, leadScore(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
+  @@index([leadScore(sort: Desc), createdAt(sort: Desc)])
   @@map("leads")
 }
 
@@ -171,6 +177,7 @@ model SearchExecution {
 
   @@index([searchQueryId, createdAt])
   @@index([status])
+  @@index([searchQueryId, status, startedAt(sort: Desc)])
   @@map("search_executions")
 }
 

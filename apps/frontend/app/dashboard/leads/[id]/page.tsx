@@ -84,14 +84,14 @@ export default function LeadDetailPage() {
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Leads
         </Link>
 
-        {lead.post?.originalUrl && (
+        {(lead.originalUrl || lead.post?.originalUrl) && (
           <a
-            href={lead.post.originalUrl}
+            href={lead.originalUrl || lead.post?.originalUrl}
             target="_blank"
-            rel="noreferrer"
-            className="text-xs font-semibold px-3 py-1.5 rounded-md border border-border hover:bg-accent inline-flex items-center gap-1.5 transition-colors"
+            rel="noopener noreferrer"
+            className="text-xs font-semibold px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-500 inline-flex items-center gap-1.5 transition-colors shadow-sm"
           >
-            Open Original Social Post <ExternalLink className="w-3.5 h-3.5" />
+            Open Live {lead.source || lead.post?.source || 'Social'} Post <ExternalLink className="w-3.5 h-3.5" />
           </a>
         )}
       </div>
@@ -193,11 +193,19 @@ export default function LeadDetailPage() {
                 <div className="p-3.5 rounded-lg bg-card border border-border text-xs font-mono text-muted-foreground whitespace-pre-wrap">
                   {lead.post?.content}
                 </div>
-                {lead.post?.authorName && (
-                  <p className="text-[11px] text-muted-foreground mt-1.5">
-                    Author: <span className="text-foreground font-medium">{lead.post.authorName}</span>
-                  </p>
-                )}
+                <div className="flex flex-wrap items-center justify-between gap-2 mt-2 pt-1 border-t border-border/50 text-[11px] text-muted-foreground">
+                  <span>Author: <strong className="text-foreground">{lead.authorName || lead.post?.authorName || 'Anonymous'}</strong></span>
+                  {(lead.originalUrl || lead.post?.originalUrl) && (
+                    <a
+                      href={lead.originalUrl || lead.post?.originalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 font-semibold inline-flex items-center gap-1 hover:underline"
+                    >
+                      View on {lead.source || lead.post?.source || 'platform'} <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

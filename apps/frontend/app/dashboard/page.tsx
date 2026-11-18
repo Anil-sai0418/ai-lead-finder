@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Clock,
   Sparkles,
+  ExternalLink,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -225,8 +226,21 @@ export default function DashboardOverviewPage() {
                       <p className="text-xs text-muted-foreground line-clamp-1">
                         {lead.projectDescription || lead.reason}
                       </p>
-                      <div className="flex items-center gap-3 text-[11px] text-muted-foreground pt-0.5">
-                        <span className="capitalize text-primary font-medium">{lead.post?.source}</span>
+                      <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground pt-0.5">
+                        <span className="capitalize text-primary font-medium">
+                          {lead.source || lead.post?.source || 'Public Feed'}
+                        </span>
+                        {(lead.originalUrl || lead.post?.originalUrl) && (
+                          <a
+                            href={lead.originalUrl || lead.post?.originalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 hover:underline font-medium"
+                          >
+                            <span>Live Post</span>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        )}
                         {lead.budget && <span className="text-emerald-400 font-medium">Budget: {lead.budget}</span>}
                         {lead.deadline && <span>Deadline: {lead.deadline}</span>}
                         <span className="flex items-center gap-1">
@@ -234,12 +248,26 @@ export default function DashboardOverviewPage() {
                         </span>
                       </div>
                     </div>
-                    <Link
-                      href={`/dashboard/leads/${lead.id}`}
-                      className="shrink-0 text-xs px-3 py-1.5 rounded-md border border-border hover:bg-accent hover:text-accent-foreground transition-colors font-medium"
-                    >
-                      Inspect
-                    </Link>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {(lead.originalUrl || lead.post?.originalUrl) && (
+                        <a
+                          href={lead.originalUrl || lead.post?.originalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 border border-blue-500/30 transition-colors font-semibold"
+                          title="Open original post on platform"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          <span className="hidden sm:inline">Post</span>
+                        </a>
+                      )}
+                      <Link
+                        href={`/dashboard/leads/${lead.id}`}
+                        className="shrink-0 text-xs px-3 py-1.5 rounded-md border border-border hover:bg-accent hover:text-accent-foreground transition-colors font-medium"
+                      >
+                        Inspect
+                      </Link>
+                    </div>
                   </div>
                 ))}
               </div>

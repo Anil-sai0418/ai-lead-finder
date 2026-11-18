@@ -152,12 +152,12 @@ export default function AllLeadsPage() {
               <thead className="bg-secondary/40 text-muted-foreground text-xs uppercase border-b border-border">
                 <tr>
                   <th className="py-3 px-4">Opportunity & Scope</th>
-                  <th className="py-3 px-4">Source</th>
+                  <th className="py-3 px-4">Source & Live Post</th>
                   <th className="py-3 px-4">Technologies</th>
                   <th className="py-3 px-4">Budget / Timeline</th>
                   <th className="py-3 px-4">Score & Priority</th>
                   <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Action</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -177,98 +177,132 @@ export default function AllLeadsPage() {
                   </tr>
                 )}
 
-                {data?.items.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-accent/40 transition-colors">
-                    <td className="py-3.5 px-4 max-w-xs">
-                      <Link
-                        href={`/dashboard/leads/${lead.id}`}
-                        className="font-semibold text-foreground hover:text-primary transition-colors block line-clamp-1"
-                      >
-                        {lead.projectTitle || 'Software Development Opportunity'}
-                      </Link>
-                      <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
-                        {lead.projectDescription || lead.reason}
-                      </p>
-                    </td>
+                {data?.items.map((lead) => {
+                  const postUrl = lead.originalUrl || lead.post?.originalUrl;
+                  const sourcePlatform = lead.source || lead.post?.source || 'MANUAL';
 
-                    <td className="py-3.5 px-4">
-                      <span className="text-xs font-medium px-2 py-0.5 rounded bg-secondary text-secondary-foreground uppercase">
-                        {lead.post?.source}
-                      </span>
-                    </td>
+                  return (
+                    <tr key={lead.id} className="hover:bg-accent/40 transition-colors">
+                      <td className="py-3.5 px-4 max-w-xs">
+                        <Link
+                          href={`/dashboard/leads/${lead.id}`}
+                          className="font-semibold text-foreground hover:text-primary transition-colors block line-clamp-1"
+                        >
+                          {lead.projectTitle || 'Software Development Opportunity'}
+                        </Link>
+                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                          {lead.projectDescription || lead.reason}
+                        </p>
+                      </td>
 
-                    <td className="py-3.5 px-4 max-w-[180px]">
-                      <div className="flex flex-wrap gap-1">
-                        {lead.technologies?.slice(0, 3).map((t: string) => (
-                          <span
-                            key={t}
-                            className="text-[11px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20"
-                          >
-                            {t}
+                      <td className="py-3.5 px-4">
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-secondary text-secondary-foreground uppercase">
+                            {sourcePlatform}
                           </span>
-                        ))}
-                        {lead.technologies?.length > 3 && (
-                          <span className="text-[11px] text-muted-foreground">
-                            +{lead.technologies.length - 3}
-                          </span>
+                          {postUrl ? (
+                            <a
+                              href={postUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-medium"
+                            >
+                              <span>Open Post</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          ) : (
+                            <span className="text-[11px] text-muted-foreground">No link</span>
+                          )}
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-4 max-w-[180px]">
+                        <div className="flex flex-wrap gap-1">
+                          {lead.technologies?.slice(0, 3).map((t: string) => (
+                            <span
+                              key={t}
+                              className="text-[11px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20"
+                            >
+                              {t}
+                            </span>
+                          ))}
+                          {lead.technologies?.length > 3 && (
+                            <span className="text-[11px] text-muted-foreground">
+                              +{lead.technologies.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-xs space-y-0.5">
+                        {lead.budget ? (
+                          <div className="text-emerald-400 font-semibold">{lead.budget}</div>
+                        ) : (
+                          <div className="text-muted-foreground">Budget: Not stated</div>
                         )}
-                      </div>
-                    </td>
+                        {lead.deadline && (
+                          <div className="text-muted-foreground text-[11px]">Due: {lead.deadline}</div>
+                        )}
+                      </td>
 
-                    <td className="py-3.5 px-4 text-xs space-y-0.5">
-                      {lead.budget ? (
-                        <div className="text-emerald-400 font-semibold">{lead.budget}</div>
-                      ) : (
-                        <div className="text-muted-foreground">Budget: Not stated</div>
-                      )}
-                      {lead.deadline && (
-                        <div className="text-muted-foreground text-[11px]">Due: {lead.deadline}</div>
-                      )}
-                    </td>
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold">{lead.leadScore}</span>
+                          <Badge
+                            variant={
+                              lead.priority === 'HIGH'
+                                ? 'high'
+                                : lead.priority === 'MEDIUM'
+                                ? 'medium'
+                                : 'low'
+                            }
+                          >
+                            {lead.priority}
+                          </Badge>
+                        </div>
+                      </td>
 
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold">{lead.leadScore}</span>
+                      <td className="py-3.5 px-4">
                         <Badge
                           variant={
-                            lead.priority === 'HIGH'
-                              ? 'high'
-                              : lead.priority === 'MEDIUM'
-                              ? 'medium'
-                              : 'low'
+                            lead.status === 'INTERESTED' || lead.status === 'CONTACTED'
+                              ? 'success'
+                              : lead.status === 'REVIEWED'
+                              ? 'default'
+                              : lead.status === 'REJECTED'
+                              ? 'destructive'
+                              : 'secondary'
                           }
                         >
-                          {lead.priority}
+                          {lead.status}
                         </Badge>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="py-3.5 px-4">
-                      <Badge
-                        variant={
-                          lead.status === 'INTERESTED' || lead.status === 'CONTACTED'
-                            ? 'success'
-                            : lead.status === 'REVIEWED'
-                            ? 'default'
-                            : lead.status === 'REJECTED'
-                            ? 'destructive'
-                            : 'secondary'
-                        }
-                      >
-                        {lead.status}
-                      </Badge>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right">
-                      <Link
-                        href={`/dashboard/leads/${lead.id}`}
-                        className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded bg-secondary hover:bg-accent text-secondary-foreground transition-colors"
-                      >
-                        Details &rarr;
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {postUrl ? (
+                            <a
+                              href={postUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="Open original public post in new tab"
+                              className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded border border-border bg-card hover:bg-accent text-foreground transition-colors"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5 text-primary" />
+                              <span>Post</span>
+                            </a>
+                          ) : null}
+                          <Link
+                            href={`/dashboard/leads/${lead.id}`}
+                            className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded bg-secondary hover:bg-accent text-secondary-foreground transition-colors"
+                          >
+                            Details &rarr;
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

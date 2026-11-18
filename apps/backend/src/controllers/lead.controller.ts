@@ -59,10 +59,17 @@ export async function getLeads(req: Request, res: Response, next: NextFunction):
       orderBy,
     });
 
+    const serializedLeads = leads.map((lead: any) => ({
+      ...lead,
+      originalUrl: lead.post?.originalUrl || null,
+      source: lead.post?.source || null,
+      authorName: lead.post?.authorName || null,
+    }));
+
     res.status(200).json({
       success: true,
       data: {
-        items: leads,
+        items: serializedLeads,
         pagination: {
           total,
           page,
@@ -79,15 +86,22 @@ export async function getLeads(req: Request, res: Response, next: NextFunction):
 export async function getLeadById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const id = String(req.params.id);
-    const lead = await leadRepository.findById(id);
+    const lead: any = await leadRepository.findById(id);
 
     if (!lead) {
       throw new AppError('Lead not found', 404, 'LEAD_NOT_FOUND');
     }
 
+    const serializedLead = {
+      ...lead,
+      originalUrl: lead.post?.originalUrl || null,
+      source: lead.post?.source || null,
+      authorName: lead.post?.authorName || null,
+    };
+
     res.status(200).json({
       success: true,
-      data: lead,
+      data: serializedLead,
     });
   } catch (error) {
     next(error);

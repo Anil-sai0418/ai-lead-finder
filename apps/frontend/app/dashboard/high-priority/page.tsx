@@ -66,81 +66,110 @@ export default function HighPriorityLeadsPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {data?.items.map((lead) => (
-          <Card key={lead.id} className="border-border hover:border-emerald-500/40 transition-colors">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="high">{lead.leadScore} / 100 PTS</Badge>
-                    <span className="text-xs text-muted-foreground uppercase">{lead.post?.source}</span>
+        {data?.items.map((lead) => {
+          const postUrl = lead.originalUrl || lead.post?.originalUrl;
+          const source = lead.source || lead.post?.source || 'MANUAL';
+
+          return (
+            <Card key={lead.id} className="border-border hover:border-emerald-500/40 transition-colors">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="high">{lead.leadScore} / 100 PTS</Badge>
+                      <span className="text-xs text-muted-foreground uppercase">{source}</span>
+                      {postUrl && (
+                        <a
+                          href={postUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-semibold"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          <span>Link</span>
+                        </a>
+                      )}
+                    </div>
+                    <Link
+                      href={`/dashboard/leads/${lead.id}`}
+                      className="font-bold text-base hover:text-primary transition-colors block line-clamp-1 pt-1"
+                    >
+                      {lead.projectTitle || 'Software Development Opportunity'}
+                    </Link>
                   </div>
-                  <Link
-                    href={`/dashboard/leads/${lead.id}`}
-                    className="font-bold text-base hover:text-primary transition-colors block line-clamp-1 pt-1"
+                  <Badge
+                    variant={
+                      lead.status === 'INTERESTED' || lead.status === 'CONTACTED'
+                        ? 'success'
+                        : lead.status === 'REVIEWED'
+                        ? 'default'
+                        : 'secondary'
+                    }
                   >
-                    {lead.projectTitle || 'Software Development Opportunity'}
-                  </Link>
+                    {lead.status}
+                  </Badge>
                 </div>
-                <Badge
-                  variant={
-                    lead.status === 'INTERESTED' || lead.status === 'CONTACTED'
-                      ? 'success'
-                      : lead.status === 'REVIEWED'
-                      ? 'default'
-                      : 'secondary'
-                  }
-                >
-                  {lead.status}
-                </Badge>
-              </div>
-            </CardHeader>
+              </CardHeader>
 
-            <CardContent className="space-y-4 pt-0">
-              <p className="text-xs text-muted-foreground line-clamp-2">
-                {lead.projectDescription || lead.reason}
-              </p>
+              <CardContent className="space-y-4 pt-0">
+                <p className="text-xs text-muted-foreground line-clamp-2">
+                  {lead.projectDescription || lead.reason}
+                </p>
 
-              {/* Technologies */}
-              <div className="flex flex-wrap gap-1.5">
-                {lead.technologies?.map((tech: string) => (
-                  <span
-                    key={tech}
-                    className="text-xs px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground font-medium"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-
-              {/* Key Commercial Metrics */}
-              <div className="grid grid-cols-2 gap-2 p-3 rounded-lg bg-secondary/30 border border-border/50 text-xs">
-                <div>
-                  <span className="text-muted-foreground block text-[11px]">Budget</span>
-                  <span className="font-semibold text-emerald-400">
-                    {lead.budget || 'Not specified'}
-                  </span>
+                {/* Technologies */}
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.technologies?.map((tech: string) => (
+                    <span
+                      key={tech}
+                      className="text-xs px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground font-medium"
+                    >
+                      {tech}
+                    </span>
+                  ))}
                 </div>
-                <div>
-                  <span className="text-muted-foreground block text-[11px]">Timeline</span>
-                  <span className="font-semibold text-foreground">
-                    {lead.deadline || 'Flexible / Unspecified'}
-                  </span>
-                </div>
-              </div>
 
-              <div className="flex items-center justify-between pt-2 text-xs border-t border-border/50">
-                <span className="text-muted-foreground">Discovered {formatDate(lead.createdAt)}</span>
-                <Link
-                  href={`/dashboard/leads/${lead.id}`}
-                  className="font-semibold text-primary hover:underline inline-flex items-center gap-1"
-                >
-                  Inspect Full Details <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                {/* Key Commercial Metrics */}
+                <div className="grid grid-cols-2 gap-2 p-3 rounded-lg bg-secondary/30 border border-border/50 text-xs">
+                  <div>
+                    <span className="text-muted-foreground block text-[11px]">Budget</span>
+                    <span className="font-semibold text-emerald-400">
+                      {lead.budget || 'Not specified'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-[11px]">Timeline</span>
+                    <span className="font-semibold text-foreground">
+                      {lead.deadline || 'Flexible / Unspecified'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 text-xs border-t border-border/50">
+                  <span className="text-muted-foreground">Discovered {formatDate(lead.createdAt)}</span>
+                  <div className="flex items-center gap-2">
+                    {postUrl && (
+                      <a
+                        href={postUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card hover:bg-accent text-foreground font-semibold transition-colors"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 text-primary" />
+                        <span>Open Post</span>
+                      </a>
+                    )}
+                    <Link
+                      href={`/dashboard/leads/${lead.id}`}
+                      className="font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                    >
+                      Inspect <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
