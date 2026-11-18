@@ -222,17 +222,29 @@ export default function SearchManagementPage() {
                       {exec.searchQuery?.name || 'Manual Query'}
                     </td>
                     <td className="py-3 px-4">
-                      <Badge
-                        variant={
-                          exec.status === 'COMPLETED'
-                            ? 'success'
-                            : exec.status === 'RUNNING'
-                            ? 'default'
-                            : 'destructive'
-                        }
-                      >
-                        {exec.status}
-                      </Badge>
+                      <div className="flex flex-col gap-1 items-start">
+                        <Badge
+                          variant={
+                            exec.status === 'COMPLETED'
+                              ? 'success'
+                              : exec.status === 'RUNNING'
+                              ? 'default'
+                              : 'destructive'
+                          }
+                        >
+                          {exec.status}
+                        </Badge>
+                        {exec.errorMessage && (
+                          <span
+                            className="text-[11px] text-red-400 font-normal max-w-[220px] truncate block cursor-help"
+                            title={exec.errorMessage}
+                          >
+                            {exec.errorMessage.includes('402') || exec.errorMessage.includes('credits depleted')
+                              ? 'X API: Credits depleted (402)'
+                              : exec.errorMessage}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3 px-4">{exec.resultsFound}</td>
                     <td className="py-3 px-4 text-emerald-400 font-semibold">{exec.newPosts}</td>

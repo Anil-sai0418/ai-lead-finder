@@ -86,6 +86,23 @@ export class TwitterSourceService implements LeadSource {
       if (!response.ok) {
         const errBody = await response.text();
         logger.error({ status: response.status, body: errBody }, 'X API error response');
+
+        if (response.status === 402) {
+          throw new AppError(
+            'X (Twitter) API returned 402 Payment Required: Credits depleted. X requires active API credits or a paid Developer tier (Basic/Pro) to access the Recent Search endpoint.',
+            402,
+            'X_CREDITS_DEPLETED'
+          );
+        }
+
+        if (response.status === 403) {
+          throw new AppError(
+            'X (Twitter) API returned 403 Forbidden: Your X Developer App does not have access permissions for the Recent Search endpoint.',
+            403,
+            'X_FORBIDDEN'
+          );
+        }
+
         throw new AppError(
           `X API request failed with status ${response.status}: ${errBody}`,
           response.status,

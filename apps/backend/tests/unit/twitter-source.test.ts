@@ -12,7 +12,7 @@ describe('TwitterSourceService (X API)', () => {
   });
 
   it('should handle pagination with nextToken', async () => {
-    const service = new TwitterSourceService();
+    const service = new TwitterSourceService('your-x-api-bearer-token-here');
     const page1 = await service.search('looking for a developer', { maxResults: 5 });
 
     expect(page1.nextToken).toBeDefined();
