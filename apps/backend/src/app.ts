@@ -10,6 +10,7 @@ import { dashboardRouter } from './routes/dashboard.router.js';
 import { aiRouter } from './routes/ai.router.js';
 import { getExecutions, getExecutionById } from './controllers/search.controller.js';
 import { errorMiddleware } from './middleware/error.middleware.js';
+import { logger } from './config/logger.js';
 
 export function createApp(): Express {
   const app = express();
@@ -17,15 +18,45 @@ export function createApp(): Express {
   // Security Headers
   app.use(helmet());
 
-  // CORS Configuration
+  // CORS Configuration - Robust origin validation for local, preview, and production domains
+  const allowedOrigins = (env.FRONTEND_URL || 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/$/, ''));
+
   app.use(
     cors({
-      origin: [env.FRONTEND_URL, 'http://localhost:3000'],
+      origin: (requestOrigin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, server-to-server)
+        if (!requestOrigin) return callback(null, true);
+
+        const cleanOrigin = requestOrigin.replace(/\/$/, '');
+
+        // Allow localhost and 127.0.0.1 for local development
+        const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(cleanOrigin);
+
+        // Allow configured frontend domains
+        const isExplicitlyAllowed = allowedOrigins.includes(cleanOrigin) || allowedOrigins.includes('*');
+
+        // Allow Vercel preview and production subdomains
+        const isVercelDomain = /^https:\/\/[a-zA-Z0-9_.-]+\.vercel\.app$/.test(cleanOrigin);
+
+        if (isLocalhost || isExplicitlyAllowed || isVercelDomain) {
+          return callback(null, true);
+        }
+
+        logger.warn({ requestOrigin }, 'CORS request blocked from origin');
+        return callback(new Error(`CORS policy does not allow access from origin: ${requestOrigin}`), false);
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+      exposedHeaders: ['Retry-After'],
+      maxAge: 86400,
     })
   );
+
+  // Enable preflight for all routes
+  app.options('*', cors());
 
   // Body Parsers
   app.use(express.json({ limit: '2mb' }));
