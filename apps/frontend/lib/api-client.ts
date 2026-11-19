@@ -1,4 +1,9 @@
-const RAW_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api/v1').trim().replace(/\/$/, '');
+const RAW_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.API_URL ||
+  'http://localhost:5001/api/v1'
+).trim().replace(/\/$/, '');
 const BASE_URL = RAW_BASE_URL.endsWith('/api/v1') ? RAW_BASE_URL : `${RAW_BASE_URL}/api/v1`;
 
 export class ApiError extends Error {
