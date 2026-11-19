@@ -14,6 +14,7 @@ const envSchema = z.object({
   DATABASE_URL: z
     .string()
     .default('postgresql://postgres:postgres@localhost:5432/ai_lead_finder?schema=public'),
+  DIRECT_URL: z.string().optional(),
   REDIS_URL: z.string().default('redis://localhost:6379'),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters').default('development-secret-key-32-characters-min'),
   JWT_EXPIRES_IN: z.string().default('7d'),
