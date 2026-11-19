@@ -55,10 +55,10 @@ export class SearchRepository {
     });
   }
 
-  public async createExecution(searchQueryId: string): Promise<SearchExecution> {
+  public async createExecution(searchQueryId?: string | null): Promise<SearchExecution> {
     return prisma.searchExecution.create({
       data: {
-        searchQueryId,
+        searchQueryId: searchQueryId || null,
         status: 'RUNNING',
         startedAt: new Date(),
       },

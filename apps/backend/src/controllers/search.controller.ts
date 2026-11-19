@@ -1,10 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { searchRepository } from '../repositories/search.repository.js';
 import { discoveryManagerService } from '../services/discovery/discovery-manager.service.js';
+import { automatedSearchService } from '../services/discovery/automated-search.service.js';
 import { AppError } from '../middleware/error.middleware.js';
 import {
   CreateSearchQueryInput,
   UpdateSearchQueryInput,
+  AutomatedSearchInput,
 } from '@ai-lead-finder/shared';
 
 export async function createSearchQuery(
@@ -176,6 +178,24 @@ export async function getExecutionById(req: Request, res: Response, next: NextFu
     res.status(200).json({
       success: true,
       data: execution,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function runAutomatedSearch(
+  req: Request<unknown, unknown, AutomatedSearchInput>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const summary = await automatedSearchService.executeAutomatedSearch(req.body);
+
+    res.status(200).json({
+      success: true,
+      message: `Automated search completed: ${summary.totalRetrieved} retrieved, ${summary.newDiscovered} new, ${summary.duplicatesSkipped} duplicates skipped`,
+      data: summary,
     });
   } catch (error) {
     next(error);

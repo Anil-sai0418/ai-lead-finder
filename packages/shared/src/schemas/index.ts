@@ -48,7 +48,7 @@ export type GoogleSearchResultImportInput = z.infer<typeof GoogleSearchResultImp
 export const CreateSearchQuerySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   query: z.string().min(3, 'Query must be at least 3 characters'),
-  source: z.enum(['TWITTER', 'GOOGLE_IMPORT', 'MANUAL']).default('TWITTER'),
+  source: z.enum(['TWITTER', 'GOOGLE_IMPORT', 'MANUAL', 'TAVILY']).default('TWITTER'),
   category: z.string().min(2, 'Category must be at least 2 characters'),
   frequency: z.enum(['HOURLY', 'DAILY', 'WEEKLY', 'MANUAL']).default('DAILY'),
   maxResults: z.number().int().min(5).max(100).default(20),
@@ -56,6 +56,15 @@ export const CreateSearchQuerySchema = z.object({
 });
 
 export type CreateSearchQueryInput = z.infer<typeof CreateSearchQuerySchema>;
+
+export const AutomatedSearchSchema = z.object({
+  query: z.string().min(3, 'Search query must be at least 3 characters').max(500, 'Search query must not exceed 500 characters'),
+  targetPlatform: z.enum(['linkedin', 'general_web', 'twitter', 'github']).default('linkedin'),
+  maxResults: z.number().int().min(1, 'At least 1 result must be requested').max(25, 'Maximum 25 results allowed per search').default(10),
+  searchDepth: z.enum(['basic', 'advanced']).default('basic'),
+});
+
+export type AutomatedSearchInput = z.infer<typeof AutomatedSearchSchema>;
 
 export const UpdateSearchQuerySchema = CreateSearchQuerySchema.partial();
 export type UpdateSearchQueryInput = z.infer<typeof UpdateSearchQuerySchema>;

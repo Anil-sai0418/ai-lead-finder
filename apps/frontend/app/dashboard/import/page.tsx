@@ -8,11 +8,12 @@ import { apiClient } from '@/lib/api-client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AutomatedSearchPanel } from '@/components/automated-search-panel';
 
 export default function ImportSubmitPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'manual' | 'google'>('manual');
+  const [activeTab, setActiveTab] = useState<'automated' | 'manual' | 'google'>('automated');
 
   // Manual submission state
   const [manualUrl, setManualUrl] = useState('');
@@ -104,29 +105,46 @@ export default function ImportSubmitPage() {
       <div className="flex border-b border-border gap-6">
         <button
           type="button"
+          onClick={() => setActiveTab('automated')}
+          className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-1.5 ${
+            activeTab === 'automated'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          Automated Search Mode (Tavily)
+        </button>
+        <button
+          type="button"
           onClick={() => setActiveTab('manual')}
-          className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
+          className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-1.5 ${
             activeTab === 'manual'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
+          <FileText className="w-4 h-4" />
           Manual Post Submission
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('google')}
-          className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
+          className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-1.5 ${
             activeTab === 'google'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
+          <UploadCloud className="w-4 h-4" />
           Google Programmable Search Import
         </button>
       </div>
 
-      {/* Tab 1: Manual Post Submission */}
+      {/* Tab 1: Automated Search Mode */}
+      {activeTab === 'automated' && <AutomatedSearchPanel />}
+
+      {/* Tab 2: Manual Post Submission */}
       {activeTab === 'manual' && (
         <Card>
           <CardHeader>

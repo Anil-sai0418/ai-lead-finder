@@ -20,6 +20,7 @@ const envSchema = z.object({
   GEMINI_API_KEY: z.string().optional().default(''),
   GEMINI_MODEL: z.string().default('gemini-1.5-flash'),
   X_BEARER_TOKEN: z.string().optional().default(''),
+  TAVILY_API_KEY: z.string().optional().default(''),
   MAX_SEARCH_RESULTS_PER_RUN: z.coerce.number().default(50),
 });
 

@@ -28,6 +28,13 @@ export class PostRepository {
     });
   }
 
+  public async findByUrl(originalUrl: string): Promise<Post | null> {
+    return prisma.post.findFirst({
+      where: { originalUrl },
+      include: { lead: true },
+    });
+  }
+
   public async create(data: Prisma.PostCreateInput): Promise<Post> {
     return prisma.post.create({
       data,

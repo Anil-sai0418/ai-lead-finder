@@ -1,5 +1,6 @@
 import { searchRepository } from '../../repositories/search.repository.js';
 import { twitterSourceService } from './twitter-source.service.js';
+import { tavilySourceService } from './tavily-source.service.js';
 import { deduplicationService } from '../deduplication/deduplication.service.js';
 import { postRepository } from '../../repositories/post.repository.js';
 import { leadPipelineService } from '../leads/lead-pipeline.service.js';
@@ -63,6 +64,10 @@ export class DiscoveryManagerService {
       let searchResult;
       if (queryRecord.source === 'TWITTER') {
         searchResult = await twitterSourceService.search(queryRecord.query, {
+          maxResults: queryRecord.maxResults,
+        });
+      } else if (queryRecord.source === 'TAVILY') {
+        searchResult = await tavilySourceService.search(queryRecord.query, {
           maxResults: queryRecord.maxResults,
         });
       } else {

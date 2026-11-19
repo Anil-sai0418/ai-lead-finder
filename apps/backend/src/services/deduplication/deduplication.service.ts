@@ -19,7 +19,20 @@ export class DeduplicationService {
     const sanitizedUrl = sanitizeUrl(params.originalUrl);
     const contentHash = computeContentHash(params.content, sanitizedUrl);
 
-    // 1. Check external post ID if available
+    // 1. Check canonical URL if available
+    if (sanitizedUrl && sanitizedUrl.length > 5) {
+      const byUrl = await postRepository.findByUrl(sanitizedUrl);
+      if (byUrl) {
+        return {
+          isDuplicate: true,
+          existingPost: byUrl,
+          contentHash,
+          sanitizedUrl,
+        };
+      }
+    }
+
+    // 2. Check external post ID if available
     if (params.externalPostId) {
       const byExternal = await postRepository.findByExternalId(params.source, params.externalPostId);
       if (byExternal) {
@@ -32,7 +45,7 @@ export class DeduplicationService {
       }
     }
 
-    // 2. Check content hash (catches reposts / cross-posts / imported text duplicates)
+    // 3. Check content hash (catches reposts / cross-posts / imported text duplicates)
     const byHash = await postRepository.findByContentHash(contentHash);
     if (byHash) {
       return {

@@ -16,6 +16,7 @@ enum DiscoverySource {
   TWITTER
   GOOGLE_IMPORT
   MANUAL
+  TAVILY
 }
 
 enum ContentLevel {
@@ -162,8 +163,8 @@ model SearchQuery {
 
 model SearchExecution {
   id             String          @id @default(uuid())
-  searchQueryId  String
-  searchQuery    SearchQuery     @relation(fields: [searchQueryId], references: [id], onDelete: Cascade)
+  searchQueryId  String?
+  searchQuery    SearchQuery?    @relation(fields: [searchQueryId], references: [id], onDelete: Cascade)
   status         ExecutionStatus @default(PENDING)
   startedAt      DateTime        @default(now())
   completedAt    DateTime?

@@ -1,4 +1,4 @@
-export type DiscoverySource = 'TWITTER' | 'GOOGLE_IMPORT' | 'MANUAL';
+export type DiscoverySource = 'TWITTER' | 'GOOGLE_IMPORT' | 'MANUAL' | 'TAVILY';
 
 export type ContentLevel = 'FULL_TEXT' | 'SNIPPET_ONLY' | 'MANUAL_TEXT';
 
@@ -69,4 +69,40 @@ export interface DeterministicScoreResult {
   score: number;
   priority: PriorityLevel;
   breakdown: ScoreBreakdown;
+}
+
+export type TargetPlatform = 'linkedin' | 'general_web' | 'twitter' | 'github';
+
+export interface AutomatedSearchResultItem {
+  postId: string;
+  leadId?: string;
+  title: string | null;
+  originalUrl: string;
+  source: DiscoverySource;
+  contentLevel: ContentLevel;
+  isDuplicate: boolean;
+  classification?: ClassificationType;
+  leadScore?: number;
+  priority?: PriorityLevel;
+  projectDescription?: string | null;
+  technologies?: string[];
+  budget?: string | null;
+  deadline?: string | null;
+  reason?: string;
+}
+
+export interface AutomatedSearchExecutionSummary {
+  executionId: string;
+  query: string;
+  targetPlatform: TargetPlatform;
+  totalRetrieved: number;
+  newDiscovered: number;
+  duplicatesSkipped: number;
+  sentForClassification: number;
+  qualifiedLeads: number;
+  notALead: number;
+  needsReview: number;
+  failedCount: number;
+  durationMs: number;
+  items: AutomatedSearchResultItem[];
 }
