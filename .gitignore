@@ -13,6 +13,7 @@ node_modules/
 
 # Builds
 dist/
+!packages/shared/dist/
 build/
 .next/
 out/
